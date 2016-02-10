@@ -104,7 +104,6 @@ class CCDNForumForumExtension extends Extension
         $loader->load('services/forms-topic.yml');
         $loader->load('services/forms-post.yml');
         $loader->load('services/twig-extensions.yml');
-        $loader->load('services/doctrine-metadata.yml');
     }
 
     /**
@@ -124,17 +123,20 @@ class CCDNForumForumExtension extends Extension
         $container->setParameter('ccdn_forum_forum.entity.subscription.class', $config['entity']['subscription']['class']);
         $container->setParameter('ccdn_forum_forum.entity.registry.class', $config['entity']['registry']['class']);
 
-        // list of model classes for the LoadORMMetadataSubscriber
-        $classes = array();
-        foreach($config['entity'] as $key => $entityConfig) {
-            $classes[$key] = array(
-                'model' => $entityConfig['class']
-            );
+        // list of model classes for the LoadORMMetadataSubscriber of the Joschi127DoctrineEntityOverrideBundle
+        $overriddenEntities = [
+            'CCDNForum\ForumBundle\Entity\Board'            => 'ccdn_forum_forum.entity.board.class',
+            'CCDNForum\ForumBundle\Entity\Category'         => 'ccdn_forum_forum.entity.category.class',
+            'CCDNForum\ForumBundle\Entity\Forum'            => 'ccdn_forum_forum.entity.forum.class',
+            'CCDNForum\ForumBundle\Entity\Post'             => 'ccdn_forum_forum.entity.post.class',
+            'CCDNForum\ForumBundle\Entity\Registry'         => 'ccdn_forum_forum.entity.registry.class',
+            'CCDNForum\ForumBundle\Entity\Subscription'     => 'ccdn_forum_forum.entity.subscription.class',
+            'CCDNForum\ForumBundle\Entity\Topic'            => 'ccdn_forum_forum.entity.topic.class',
+        ];
+        if ($container->hasParameter('joschi127_doctrine_entity_override.config.overridden_entities')) {
+            $overriddenEntities = array_merge($container->getParameter('joschi127_doctrine_entity_override.config.overridden_entities'), $overriddenEntities);
         }
-        if ($container->hasParameter('ccdn_forum_forum.config.classes')) {
-            $classes = array_merge($classes, $container->getParameter('ccdn_forum_forum.config.classes'));
-        }
-        $container->setParameter('ccdn_forum_forum.config.classes', $classes);
+        $container->setParameter('joschi127_doctrine_entity_override.config.overridden_entities', $overriddenEntities);
 
         return $this;
     }
